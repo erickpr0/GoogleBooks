@@ -8,7 +8,7 @@ android {
 
     defaultConfig {
         applicationId "com.example.googlebooks"
-        minSdk 30
+        minSdk 29
         targetSdk 33
         versionCode 1
         versionName "1.0"
@@ -38,6 +38,6 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 
     // Solicitudes HTTP y GSON
-    implementation 'com.squareup.retrofit2:retrofit:2.x.x'
-    implementation 'com.squareup.retrofit2:converter-gson:2.x.x'
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.6.4'
 }
