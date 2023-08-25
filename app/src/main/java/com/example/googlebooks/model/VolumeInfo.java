@@ -5,7 +5,7 @@ import java.util.List;
 public class VolumeInfo {
     private String title;
     private List<String> authors;
-    private String description;
+    private ImageLinks imageLinks;
 
     public String getTitle() {
         return title;
@@ -15,7 +15,7 @@ public class VolumeInfo {
         return authors;
     }
 
-    public String getDescription() {
-        return description;
+    public ImageLinks getImageLinks() {
+        return imageLinks;
     }
 }

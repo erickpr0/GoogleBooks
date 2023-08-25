@@ -3,11 +3,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ListView
+    <androidx.recyclerview.widget.RecyclerView
+        android:padding="18dp"
         android:id="@+id/bookList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="5dp"
-        android:background="@drawable/rectangle" />
+        android:layout_margin="5dp" />
 
 </LinearLayout>

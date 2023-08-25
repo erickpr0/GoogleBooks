@@ -1,10 +1,10 @@
 package com.example.googlebooks.model;
 
 public class Book {
-    private int id;
+    private String id;
     private VolumeInfo volumeInfo;
 
-    public int getId() {
+    public String getId() {
         return id;
     }
 
