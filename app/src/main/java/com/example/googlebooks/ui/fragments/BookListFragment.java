@@ -30,6 +30,10 @@ import retrofit2.Response;
 public class BookListFragment extends Fragment {
     private BookAdapter bookAdapter;
     private RecyclerView recyclerView;
+    private int currentPage = 0;
+    private final int itemsPerPage = 10;
+    boolean isLoading = false;
+    String searchTxt;
 
     @Nullable
     @Override
@@ -41,13 +45,13 @@ public class BookListFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        String searchTxt = requireArguments().getString("searchTxt");
+        searchTxt = requireArguments().getString("searchTxt");
         recyclerView = view.findViewById(R.id.bookList);
         recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
 
         Call<ApiResponse> call = ApiClient.getClient()
                 .create(GoogleBooksApi.class)
-                .searchBooks(searchTxt);
+                .searchBooks(searchTxt, 0, 10);
 
         call.enqueue(new Callback<ApiResponse>() {
             @Override
@@ -73,6 +77,52 @@ public class BookListFragment extends Fragment {
                 Toast.makeText(requireContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
             }
 
+        });
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount = layoutManager.getItemCount();
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount
+                        && firstVisibleItemPosition >= 0) {
+                    loadNextPage();
+                }
+            }
+        });
+
+    }
+
+    private void loadNextPage() {
+        isLoading = true;
+        int startIndex = currentPage * itemsPerPage;
+
+        Call<ApiResponse> call = ApiClient.getClient()
+                .create(GoogleBooksApi.class)
+                .searchBooks(searchTxt, startIndex, 10);
+        call.enqueue(new Callback<ApiResponse>() {
+
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
+                isLoading = false;
+                if (response.isSuccessful()) {
+                    ApiResponse apiResponse = response.body();
+                    List<Book> newBooks = apiResponse.getItems();
+                    bookAdapter.addBooks(newBooks);
+                    currentPage++;
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ApiResponse> call, Throwable t) {
+                isLoading = false;
+                // Maneja el fallo de la llamada aquí
+            }
         });
     }
 }

@@ -56,6 +56,12 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
         return books.size();
     }
 
+    public void addBooks(List<Book> newBooks) {
+        int startPosition = books.size();
+        books.addAll(newBooks);
+        notifyItemRangeInserted(startPosition, newBooks.size());
+    }
+
     public static class ViewHolder extends RecyclerView.ViewHolder {
         private final ImageView img;
         private final TextView tittle;
