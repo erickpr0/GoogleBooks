@@ -7,4 +7,6 @@
     <string name="raiting">Raiting: </string>
     <string name="descripci_n">Descripción</string>
     <string name="publishDate">"Fecha de publicación: "</string>
+    <string name="el_libro_no_cuenta_con_descripci_n">El libro no cuenta con descripción</string>
+    <string name="b_squeda_de_libros">Búsqueda de libros</string>
 </resources>

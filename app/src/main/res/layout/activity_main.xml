@@ -6,10 +6,31 @@
     android:layout_height="match_parent"
     tools:context=".ui.activities.MainActivity">
 
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:layout_alignParentTop="true"
+        android:background="#8278DD"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/b_squeda_de_libros"
+            android:textColor="@color/white"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
     <androidx.cardview.widget.CardView
         android:id="@+id/card"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_below="@id/header"
         android:layout_marginHorizontal="5dp"
         android:layout_marginTop="10dp"
         app:cardCornerRadius="5dp"
@@ -35,5 +56,16 @@
         android:layout_below="@+id/card"
         android:layout_marginTop="5dp" />
 
+    <RelativeLayout
+        android:id="@+id/progress"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/card"
+        android:gravity="center"
+        android:visibility="gone">
 
+        <ProgressBar
+            android:layout_width="200dp"
+            android:layout_height="200dp" />
+    </RelativeLayout>
 </RelativeLayout>

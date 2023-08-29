@@ -19,6 +19,7 @@ import com.example.googlebooks.model.ApiResponse;
 import com.example.googlebooks.model.Book;
 import com.example.googlebooks.model.interfaces.GoogleBooksApi;
 import com.example.googlebooks.network.ApiClient;
+import com.example.googlebooks.ui.activities.MainActivity;
 import com.example.googlebooks.ui.adapters.BookAdapter;
 
 import java.util.List;
@@ -58,6 +59,7 @@ public class BookListFragment extends Fragment {
             @Override
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
                 if (response.isSuccessful()) {
+                    MainActivity.progress.setVisibility(View.GONE);
                     ApiResponse apiResponse = response.body();
                     assert apiResponse != null;
                     books = apiResponse.getItems();
@@ -66,12 +68,12 @@ public class BookListFragment extends Fragment {
                     recyclerView.setAdapter(bookAdapter);
 
                     // Procesar la lista de libros aquí
-                    for (Book book : books) {
+                    /*for (Book book : books) {
                         String title = book.getVolumeInfo().getTitle();
                         Log.d("book", "onResponse: ID BOOK:" + book.getId());
                         List<String> authors = book.getVolumeInfo().getAuthors();
                         Log.d("book", "onResponse: " + title);
-                    }
+                    }*/
 
                     bookAdapter.setOnClickListener(position -> {
                         Book book = books.get(position);

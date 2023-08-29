@@ -52,6 +52,8 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
                     .override(200, 200) // Set the target dimensions
                     .into(holder.img);
 
+        } else {
+            holder.img.setImageResource(R.drawable.ic_unknown_foreground);
         }
 
         holder.itemView.setOnClickListener(v -> {

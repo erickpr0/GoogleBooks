@@ -6,7 +6,7 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 
 public class Book implements Parcelable {
-    private String id;
+    private final String id;
     private VolumeInfo volumeInfo;
 
     protected Book(Parcel in) {
