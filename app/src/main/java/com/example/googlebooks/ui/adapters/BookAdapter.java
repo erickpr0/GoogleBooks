@@ -19,8 +19,12 @@ import com.example.googlebooks.model.ImageLinks;
 import java.util.List;
 
 public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
-    private final List<Book> books;
-    private final Context context;
+    private List<Book> books;
+    private Context context;
+    OnClickListener onClickListener;
+
+    public BookAdapter() {
+    }
 
     public BookAdapter(List<Book> books, Context context) {
         this.books = books;
@@ -49,6 +53,24 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
                     .into(holder.img);
 
         }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (onClickListener != null) {
+                onClickListener.onClick(position);
+            }
+        });
+    }
+
+    public interface OnItemLongClickListener {
+        void onItemLongClick(int position);
+    }
+
+    public void setOnClickListener(OnClickListener onClickListener) {
+        this.onClickListener = onClickListener;
+    }
+
+    public interface OnClickListener {
+        void onClick(int position);
     }
 
     @Override

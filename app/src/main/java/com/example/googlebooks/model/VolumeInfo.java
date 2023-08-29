@@ -6,6 +6,11 @@ public class VolumeInfo {
     private String title;
     private List<String> authors;
     private ImageLinks imageLinks;
+    private String description;
+    private int pageCount;
+    private double averageRaiting;
+    private String language;
+
 
     public String getTitle() {
         return title;
@@ -17,5 +22,21 @@ public class VolumeInfo {
 
     public ImageLinks getImageLinks() {
         return imageLinks;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getPageCount() {
+        return pageCount;
+    }
+
+    public double getAverageRaiting() {
+        return averageRaiting;
+    }
+
+    public String getLanguage() {
+        return language;
     }
 }

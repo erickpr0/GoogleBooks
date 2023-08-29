@@ -28,12 +28,14 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class BookListFragment extends Fragment {
-    private BookAdapter bookAdapter;
-    private RecyclerView recyclerView;
+    BookAdapter bookAdapter = new BookAdapter();
+    String API_KEY = "AIzaSyC78-9FI7M8MnsJsWrAnw7FZV6lvq0SaO8";
+    RecyclerView recyclerView;
     private int currentPage = 0;
-    private final int itemsPerPage = 10;
     boolean isLoading = false;
-    String searchTxt;
+    private String searchTxt;
+    List<Book> books;
+    List<Book> bookDetails;
 
     @Nullable
     @Override
@@ -58,7 +60,8 @@ public class BookListFragment extends Fragment {
             public void onResponse(@NonNull Call<ApiResponse> call, @NonNull Response<ApiResponse> response) {
                 if (response.isSuccessful()) {
                     ApiResponse apiResponse = response.body();
-                    List<Book> books = apiResponse.getItems();
+                    assert apiResponse != null;
+                    books = apiResponse.getItems();
 
                     bookAdapter = new BookAdapter(books, requireContext());
                     recyclerView.setAdapter(bookAdapter);
@@ -66,9 +69,45 @@ public class BookListFragment extends Fragment {
                     // Procesar la lista de libros aquí
                     for (Book book : books) {
                         String title = book.getVolumeInfo().getTitle();
+                        Log.d("book", "onResponse: ID BOOK:" + book.getId());
                         List<String> authors = book.getVolumeInfo().getAuthors();
                         Log.d("book", "onResponse: " + title);
                     }
+
+                    bookAdapter.setOnClickListener(new BookAdapter.OnClickListener() {
+                        @Override
+                        public void onClick(int position) {
+                            Book book = books.get(position);
+
+                            Call<Book> callDetails = ApiClient.getClient()
+                                    .create(GoogleBooksApi.class)
+                                    .getBookDetails(book.getId(), API_KEY);
+
+                            callDetails.enqueue(new Callback<Book>() {
+                                @Override
+                                public void onResponse(@NonNull Call<Book> call1, @NonNull Response<Book> response) {
+                                    if (response.isSuccessful()) {
+                                        Book b = response.body();
+                                        //bookDetails = apiResponse.getItems();
+
+                                        assert response.body() != null;
+                                        Log.d("b", "onResponse: " + book.getId());
+                                        Log.d("b", "onResponse: " + response.body());
+
+                                        Log.d("b", "onResponse: " + b.getVolumeInfo().getDescription());
+                                        Log.d("b", "onResponse: " + b.getVolumeInfo().getLanguage());
+                                        Log.d("b", "onResponse: " + b.getVolumeInfo().getPageCount());
+                                        Log.d("b", "onResponse: " + b.getVolumeInfo().getAverageRaiting());
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(@NonNull Call<Book> call1, Throwable t) {
+
+                                }
+                            });
+                        }
+                    });
                 }
             }
 
@@ -79,12 +118,14 @@ public class BookListFragment extends Fragment {
 
         });
 
+
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
 
                 LinearLayoutManager layoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
+                assert layoutManager != null;
                 int visibleItemCount = layoutManager.getChildCount();
                 int totalItemCount = layoutManager.getItemCount();
                 int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
@@ -96,10 +137,12 @@ public class BookListFragment extends Fragment {
             }
         });
 
+
     }
 
     private void loadNextPage() {
         isLoading = true;
+        int itemsPerPage = 10;
         int startIndex = currentPage * itemsPerPage;
 
         Call<ApiResponse> call = ApiClient.getClient()
@@ -112,6 +155,7 @@ public class BookListFragment extends Fragment {
                 isLoading = false;
                 if (response.isSuccessful()) {
                     ApiResponse apiResponse = response.body();
+                    assert apiResponse != null;
                     List<Book> newBooks = apiResponse.getItems();
                     bookAdapter.addBooks(newBooks);
                     currentPage++;
@@ -119,9 +163,8 @@ public class BookListFragment extends Fragment {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse> call, @NonNull Throwable t) {
                 isLoading = false;
-                // Maneja el fallo de la llamada aquí
             }
         });
     }
