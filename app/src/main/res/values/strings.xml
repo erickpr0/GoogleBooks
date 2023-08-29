@@ -2,4 +2,9 @@
     <string name="app_name">GoogleBooks</string>
     <string name="buscar">Buscar</string>
     <string name="img">img\n</string>
+    <string name="idioma">Idioma:</string>
+    <string name="paginas">Páginas: </string>
+    <string name="raiting">Raiting: </string>
+    <string name="descripci_n">Descripción</string>
+    <string name="publishDate">"Fecha de publicación: "</string>
 </resources>

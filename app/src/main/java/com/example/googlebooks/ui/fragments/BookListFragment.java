@@ -28,14 +28,13 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class BookListFragment extends Fragment {
-    BookAdapter bookAdapter = new BookAdapter();
-    String API_KEY = "AIzaSyC78-9FI7M8MnsJsWrAnw7FZV6lvq0SaO8";
-    RecyclerView recyclerView;
+    private BookAdapter bookAdapter = new BookAdapter();
+    private final String API_KEY = "AIzaSyC78-9FI7M8MnsJsWrAnw7FZV6lvq0SaO8";
+    private RecyclerView recyclerView;
     private int currentPage = 0;
     boolean isLoading = false;
     private String searchTxt;
-    List<Book> books;
-    List<Book> bookDetails;
+    private List<Book> books;
 
     @Nullable
     @Override
@@ -74,39 +73,43 @@ public class BookListFragment extends Fragment {
                         Log.d("book", "onResponse: " + title);
                     }
 
-                    bookAdapter.setOnClickListener(new BookAdapter.OnClickListener() {
-                        @Override
-                        public void onClick(int position) {
-                            Book book = books.get(position);
+                    bookAdapter.setOnClickListener(position -> {
+                        Book book = books.get(position);
 
-                            Call<Book> callDetails = ApiClient.getClient()
-                                    .create(GoogleBooksApi.class)
-                                    .getBookDetails(book.getId(), API_KEY);
+                        Call<Book> callDetails = ApiClient.getClient()
+                                .create(GoogleBooksApi.class)
+                                .getBookDetails(book.getId(), API_KEY);
 
-                            callDetails.enqueue(new Callback<Book>() {
-                                @Override
-                                public void onResponse(@NonNull Call<Book> call1, @NonNull Response<Book> response) {
-                                    if (response.isSuccessful()) {
-                                        Book b = response.body();
-                                        //bookDetails = apiResponse.getItems();
+                        callDetails.enqueue(new Callback<Book>() {
+                            @Override
+                            public void onResponse(@NonNull Call<Book> call1, @NonNull Response<Book> response1) {
+                                if (response1.isSuccessful()) {
+                                    Book b = response1.body();
+                                    assert response1.body() != null;
+                                    Log.d("b", "onResponse: " + book.getId());
+                                    Log.d("b", "onResponse: " + response1.body());
 
-                                        assert response.body() != null;
-                                        Log.d("b", "onResponse: " + book.getId());
-                                        Log.d("b", "onResponse: " + response.body());
+                                    assert b != null;
+                                    Log.d("b", "onResponse: " + b.getVolumeInfo().getDescription());
+                                    Log.d("b", "onResponse: " + b.getVolumeInfo().getLanguage());
+                                    Log.d("b", "onResponse: " + b.getVolumeInfo().getPageCount());
+                                    Log.d("b", "onResponse: " + b.getVolumeInfo().getPublishedDate());
 
-                                        Log.d("b", "onResponse: " + b.getVolumeInfo().getDescription());
-                                        Log.d("b", "onResponse: " + b.getVolumeInfo().getLanguage());
-                                        Log.d("b", "onResponse: " + b.getVolumeInfo().getPageCount());
-                                        Log.d("b", "onResponse: " + b.getVolumeInfo().getAverageRaiting());
-                                    }
+                                    Bundle bundle = new Bundle();
+                                    bundle.putParcelable("book", b);
+                                    requireActivity().getSupportFragmentManager().beginTransaction()
+                                            .setReorderingAllowed(true)
+                                            .replace(R.id.container, DetailsFragment.class, bundle)
+                                            .addToBackStack(null)
+                                            .commit();
                                 }
+                            }
 
-                                @Override
-                                public void onFailure(@NonNull Call<Book> call1, Throwable t) {
+                            @Override
+                            public void onFailure(@NonNull Call<Book> call1, @NonNull Throwable t) {
 
-                                }
-                            });
-                        }
+                            }
+                        });
                     });
                 }
             }

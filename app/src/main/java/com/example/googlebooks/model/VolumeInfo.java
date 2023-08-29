@@ -8,9 +8,8 @@ public class VolumeInfo {
     private ImageLinks imageLinks;
     private String description;
     private int pageCount;
-    private double averageRaiting;
+    private String publishedDate;
     private String language;
-
 
     public String getTitle() {
         return title;
@@ -32,8 +31,8 @@ public class VolumeInfo {
         return pageCount;
     }
 
-    public double getAverageRaiting() {
-        return averageRaiting;
+    public String getPublishedDate() {
+        return publishedDate;
     }
 
     public String getLanguage() {

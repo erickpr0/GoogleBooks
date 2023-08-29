@@ -1,4 +1,4 @@
-package com.example.googlebooks.ui;
+package com.example.googlebooks.ui.activities;
 
 import android.os.Bundle;
 
