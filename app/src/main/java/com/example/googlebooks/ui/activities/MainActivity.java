@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
 
         //TODO
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("185540064241-6qqiiqfqcbr68saus938e336u1aantfa.apps.googleusercontent.com")
+                .requestIdToken("185540064241-60r8nib88uqikc3ove20authegbddfrk.apps.googleusercontent.com")
                 .requestEmail()
                 .build();
 
@@ -158,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "ERROR", Toast.LENGTH_SHORT).show();
             Log.e("fav", "handleSignInResult: " + e.getStatus());
             Log.e("fav", "handleSignInResult: " + e.getStatusCode());
+            Log.e("fav", "handleSignInResult: " + e.getStackTrace().toString());
             Log.e("fav", "handleSignInResult: " + e.getCause());
             Log.e("fav", "handleSignInResult: " + e.getMessage());
         }
