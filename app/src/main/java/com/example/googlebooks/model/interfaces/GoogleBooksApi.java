@@ -25,9 +25,10 @@ public interface GoogleBooksApi {
             @Path("volumeId") String volumeId,
             @Query("key") String apiKey);
 
-    //Obtener estanterías del usuario
+
     @Headers("Accept: application/json")
     @GET("mylibrary/bookshelves")
     Call<BookshelvesResponse> getBookshelves(@Header("Authorization") String authorization);
+
 }
 

@@ -7,6 +7,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -16,11 +20,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 
 import com.example.googlebooks.R;
+import com.example.googlebooks.model.AccessTokenResponse;
 import com.example.googlebooks.model.ApiResponse;
 import com.example.googlebooks.model.interfaces.Bookshelf;
 import com.example.googlebooks.model.interfaces.BookshelvesResponse;
 import com.example.googlebooks.model.interfaces.GoogleBooksApi;
 import com.example.googlebooks.network.ApiClient;
+import com.example.googlebooks.network.GoogleOAuthService;
 import com.example.googlebooks.ui.fragments.BookListFragment;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.api.Auth;
@@ -33,21 +39,36 @@ import com.google.android.gms.common.api.Api;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.GoogleApi;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.Scope;
 import com.google.android.gms.tasks.Task;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.ConnectException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
     @SuppressLint("StaticFieldLeak")
     public static RelativeLayout progress;
     LinearLayout header;
     //private GoogleApi googleApiClient;
-    private GoogleSignInClient mGoogleSignInClient;
+    private GoogleSignInClient googleSignInClient;
+    private String idToken;
+    private WebView webView;
 
     private static final int RC_SIGN_IN = 123;
 
@@ -60,45 +81,22 @@ public class MainActivity extends AppCompatActivity {
 
         //TODO
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken("185540064241-60r8nib88uqikc3ove20authegbddfrk.apps.googleusercontent.com")
+                .requestIdToken("185540064241-bh07pth20bs0ngr0mpekudgip8spg4sl.apps.googleusercontent.com")
+                .requestServerAuthCode("185540064241-bh07pth20bs0ngr0mpekudgip8spg4sl.apps.googleusercontent.com", false)
+                .requestScopes(new Scope("https://www.googleapis.com/auth/books"))
                 .requestEmail()
                 .build();
 
-        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
-        /*googleApiClient = new GoogleApiClient.Builder(this)
-                .addApi(Auth.CREDENTIALS_API)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();*/
-
+        GoogleSignInClient googleSignInClient1 = GoogleSignIn.getClient(this, gso);
+        Intent signInIntent = googleSignInClient1.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
         // Iniciar el flujo de autenticación
-        signIn();
+        //signIn();
 
         header = findViewById(R.id.header);
         header.setOnClickListener(v -> {
-            Call<BookshelvesResponse> call = ApiClient.getClient().create(GoogleBooksApi.class)
-                    .getBookshelves("Bearer " + "185540064241-9o2l86dbpksesnthu62e2j69ko3b38o5");
 
-            call.enqueue(new Callback<BookshelvesResponse>() {
-                @Override
-                public void onResponse(@NonNull Call<BookshelvesResponse> call, Response<BookshelvesResponse> response) {
-                    if (response.isSuccessful()) {
-                        BookshelvesResponse bookshelvesResponse = response.body();
-                        List<Bookshelf> bookshelves = bookshelvesResponse.getItems();
-
-                        Log.d("fav", "onResponse: ");
-                        // Handle the list of bookshelves
-                    } else {
-                        // Handle error
-                        Log.d("fav", "onResponse: error ");
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<BookshelvesResponse> call, Throwable t) {
-                    // Handle failure
-                }
-            });
         });
 
         SearchView searchView = findViewById(R.id.searchView);
@@ -130,11 +128,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void signIn() {
-        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -145,22 +138,105 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void sendToken(String authCode) throws IOException {
+
+        final String BASE_URL = "https://oauth2.googleapis.com/";
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        GoogleOAuthService oAuthService = retrofit.create(GoogleOAuthService.class);
+
+        Call<AccessTokenResponse> call = oAuthService.exchangeCodeForToken(
+                authCode,
+                "185540064241-bh07pth20bs0ngr0mpekudgip8spg4sl.apps.googleusercontent.com",
+                "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",
+                //"https://com.example.googlebooks",
+                "authorization_code"
+        );
+
+        call.enqueue(new Callback<AccessTokenResponse>() {
+            @Override
+            public void onResponse(Call<AccessTokenResponse> call, Response<AccessTokenResponse> response) {
+                Log.e("lucy", "onResponse: " + response.code());
+                Log.e("lucy", "onResponse: " + response.message());
+                Log.e("lucy", "onResponse: " + response.errorBody());
+                Log.e("lucy", "onResponse: " + response.body());
+                Log.e("lucy", "onResponse: " + response.raw());
+                if (response.isSuccessful()) {
+                    AccessTokenResponse tokenResponse = response.body();
+                    assert tokenResponse != null;
+                    String accessToken = tokenResponse.getAccessToken();
+                    Log.d("lucy", "onResponse: accesToken: " + accessToken);
+                    // Hacer algo con el token de acceso
+
+                    //TODO
+                    Call<BookshelvesResponse> callShelves = ApiClient.getClient()
+                            .create(GoogleBooksApi.class)
+                            .getBookshelves("Bearer " + accessToken);
+
+                    callShelves.enqueue(new Callback<BookshelvesResponse>() {
+                        @Override
+                        public void onResponse(@NonNull Call<BookshelvesResponse> call, @NonNull Response<BookshelvesResponse> response) {
+                            try {
+                                if (response.isSuccessful()) {
+                                    Log.d("lucy", "onResponse: successfully ");
+                                    Toast.makeText(MainActivity.this, "SUCCESS TOKEN", Toast.LENGTH_SHORT).show();
+                                    BookshelvesResponse bookshelvesResponse = response.body();
+                                    List<Bookshelf> bookshelves = bookshelvesResponse.getItems();
+
+                                    for (Bookshelf b : bookshelves) {
+                                        Log.d("lucy", "onResponse: bookshelve " + b.getTitle());
+                                    }
+                                } else {
+                                    Toast.makeText(MainActivity.this, "ERROR TOKEN", Toast.LENGTH_SHORT).show();
+                                    // Handle error
+                                    Log.d("fav", "onResponse: error " + response.code());
+                                    Log.d("fav", "onResponse: error " + response.message());
+                                    Log.d("fav", "onResponse: error " + response.errorBody().toString());
+                                }
+                            } catch (Exception e) {
+                                Log.e("fav", "onResponse: error " + e);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(@NonNull Call<BookshelvesResponse> call, @NonNull Throwable t) {
+                            // Handle failure
+                        }
+                    });
+
+                } else {
+                    Log.d("lucy", "onResponse: error");
+                    // La solicitud no fue exitosa
+                }
+            }
+
+            @Override
+            public void onFailure(Call<AccessTokenResponse> call, Throwable t) {
+
+            }
+        });
+    }
+
     private void handleSignInResult(Task<GoogleSignInAccount> result) {
 
         try {
             GoogleSignInAccount account = result.getResult(ApiException.class);
             Toast.makeText(this, "SUCESS", Toast.LENGTH_SHORT).show();
-            //GoogleSignInAccount account = result.get;
-            String idToken = account.getIdToken(); // Obtener el token de acceso
-            Log.d("fav", "handleSignInResult: " + idToken);
+            String authCode = account.getServerAuthCode(); // Obtener el token de acceso
+
+            Log.d("lucy", "handleSignInResult: " + account.getServerAuthCode());
+
+            sendToken(authCode);
+
         } catch (ApiException e) {
-            //e.printStackTrace();
-            Toast.makeText(this, "ERROR", Toast.LENGTH_SHORT).show();
-            Log.e("fav", "handleSignInResult: " + e.getStatus());
-            Log.e("fav", "handleSignInResult: " + e.getStatusCode());
-            Log.e("fav", "handleSignInResult: " + e.getStackTrace().toString());
-            Log.e("fav", "handleSignInResult: " + e.getCause());
-            Log.e("fav", "handleSignInResult: " + e.getMessage());
+            e.printStackTrace();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
     }
 }
