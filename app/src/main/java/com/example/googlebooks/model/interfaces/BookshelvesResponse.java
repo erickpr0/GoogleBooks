@@ -1,11 +1,11 @@
 package com.example.googlebooks.model.interfaces;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class BookshelvesResponse {
-    private List<Bookshelf> items;
+    private ArrayList<Bookshelf> items;
 
-    public List<Bookshelf> getItems() {
+    public ArrayList<Bookshelf> getItems() {
         return items;
     }
 }

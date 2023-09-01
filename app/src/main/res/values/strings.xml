@@ -10,4 +10,8 @@
     <string name="el_libro_no_cuenta_con_descripci_n">El libro no cuenta con descripción</string>
     <string name="b_squeda_de_libros">Búsqueda de libros</string>
     <string name="default_web_client_id">185540064241-9o2l86dbpksesnthu62e2j69ko3b38o5.apps.googleusercontent.com</string>
+    <string name="agregar_a_favoritos">AGREGAR A FAVORITOS</string>
+    <string name="base_url">https://www.googleapis.com/books/v1/</string>
+    <string name="profile">profile</string>
+    <string name="favoritos">Favoritos</string>
 </resources>
