@@ -1,14 +1,13 @@
 package com.example.googlebooks.ui.activities;
 
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
@@ -21,9 +20,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.googlebooks.R;
-import com.example.googlebooks.model.AccessTokenResponse;
-import com.example.googlebooks.model.interfaces.Bookshelf;
-import com.example.googlebooks.model.interfaces.BookshelvesResponse;
+import com.example.googlebooks.model.classes.AccessTokenResponse;
+import com.example.googlebooks.model.classes.Bookshelf;
+import com.example.googlebooks.model.classes.BookshelvesResponse;
 import com.example.googlebooks.model.interfaces.GoogleBooksApi;
 import com.example.googlebooks.network.ApiClient;
 import com.example.googlebooks.network.GoogleOAuthService;
@@ -47,9 +46,15 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class MainActivity extends AppCompatActivity {
+    private static final int RC_SIGN_IN = 123;
+    private static final String CLIENT_ID = "185540064241-bh07pth20bs0ngr0mpekudgip8spg4sl.apps.googleusercontent.com";
+    private static final String CLIENT_SECRET = "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";
+    private static final String BASE_URL = "https://oauth2.googleapis.com/";
+    private static final String SCOPE_URL = "https://www.googleapis.com/auth/books";
+    public static AtomicBoolean favorites = new AtomicBoolean(false);
+
     @SuppressLint("StaticFieldLeak")
     public static RelativeLayout progress;
-    private static final int RC_SIGN_IN = 123;
     private ImageView profileImageView;
     private GoogleSignInClient googleSignInClient1;
     private String accessToken;
@@ -62,22 +67,26 @@ public class MainActivity extends AppCompatActivity {
 
         progress = findViewById(R.id.progress);
         profileImageView = findViewById(R.id.profileImg);
-        ImageView filter = findViewById(R.id.filter);
+        /*ImageView filter = findViewById(R.id.filter);*/
 
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestIdToken("185540064241-bh07pth20bs0ngr0mpekudgip8spg4sl.apps.googleusercontent.com").requestServerAuthCode("185540064241-bh07pth20bs0ngr0mpekudgip8spg4sl.apps.googleusercontent.com", false).requestScopes(new Scope("https://www.googleapis.com/auth/books")).requestEmail().build();
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(CLIENT_ID)
+                .requestServerAuthCode(CLIENT_ID, false)
+                .requestScopes(new Scope(SCOPE_URL))
+                .requestEmail()
+                .build();
 
         googleSignInClient1 = GoogleSignIn.getClient(this, gso);
 
         // Iniciar el flujo de autenticación
-
         Intent signInIntent = googleSignInClient1.getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
 
         // Filtrar por favoritos
 
-        AtomicBoolean favorites = new AtomicBoolean(false);
+        favorites.set(false);
 
-        filter.setOnClickListener(v -> {
+        /*filter.setOnClickListener(v -> {
             if (favorites.get()) {
                 Animation animation = AnimationUtils.loadAnimation(this, R.anim.anim_sub_buttons);
                 filter.setAnimation(animation);
@@ -88,10 +97,10 @@ public class MainActivity extends AppCompatActivity {
                 filter.setImageResource(R.drawable.ic_heart_red);
                 Animation animation = AnimationUtils.loadAnimation(this, R.anim.anim_sub_buttons);
                 filter.setAnimation(animation);
-                BookListFragment.showFavorites(accessToken);
+                BookListFragment.showFavorites(accessToken, context);
                 favorites.set(true);
             }
-        });
+        });*/
 
         //* Buscador de libros
         SearchView searchView = findViewById(R.id.searchView);
@@ -110,28 +119,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void showCheckBoxDialog() {
-        View checkboxDialogView = getLayoutInflater().inflate(R.layout.checbox_dialog, null);
-
-        CheckBox checkboxOption1 = checkboxDialogView.findViewById(R.id.checkbox_option1);
-        boolean option1Selected = checkboxOption1.isChecked();
-
-        // Create the AlertDialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(checkboxDialogView).setTitle("Filtrar resultados").setPositiveButton("Aceptar", (dialog, which) -> {
-            if (option1Selected) {
-                BookListFragment.showFavorites(accessToken);
-                checkboxOption1.setChecked(option1Selected);
-            }
-        }).setNegativeButton("Cancel", (dialog, which) -> {
-            dialog.dismiss();
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-
-    }
-
     private void querySearch(Bundle savedInstanceState, String query) {
         if (savedInstanceState == null) {
             Bundle bundle = new Bundle();
@@ -139,7 +126,8 @@ public class MainActivity extends AppCompatActivity {
             bundle.putString("token", accessToken);
             bundle.putParcelableArrayList("shelves", bookshelves);
 
-            getSupportFragmentManager().beginTransaction().setReorderingAllowed(true).replace(R.id.container, BookListFragment.class, bundle).addToBackStack(null).commit();
+            getSupportFragmentManager().beginTransaction().setReorderingAllowed(true)
+                    .replace(R.id.container, BookListFragment.class, bundle).addToBackStack(null).commit();
         }
     }
 
@@ -154,14 +142,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getAccessToken(String authCode) throws IOException {
-        final String BASE_URL = "https://oauth2.googleapis.com/";
+        //final String BASE_URL = "https://oauth2.googleapis.com/";
 
         Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
 
         GoogleOAuthService oAuthService = retrofit.create(GoogleOAuthService.class);
 
-        Call<AccessTokenResponse> call = oAuthService.exchangeCodeForToken(authCode, "185540064241-bh07pth20bs0ngr0mpekudgip8spg4sl.apps.googleusercontent.com", "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",
-                //"https://com.example.googlebooks",
+        Call<AccessTokenResponse> call = oAuthService.exchangeCodeForToken(authCode, CLIENT_ID, CLIENT_SECRET,
                 "authorization_code");
 
         call.enqueue(new Callback<AccessTokenResponse>() {
@@ -184,10 +171,6 @@ public class MainActivity extends AppCompatActivity {
                                     assert bookshelvesResponse != null;
                                     bookshelves = bookshelvesResponse.getItems();
 
-                                    for (Bookshelf b : bookshelves) {
-                                        Log.d("lucy", "onResponse: bookshelve " + b.getTitle());
-                                        Log.d("lucy", "onResponse: bookshelve " + b.getId());
-                                    }
                                 } else {
                                     Toast.makeText(MainActivity.this, "ERROR TOKEN", Toast.LENGTH_SHORT).show();
                                     // Handle error
@@ -240,11 +223,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void updateUI(GoogleSignInAccount account) {
         if (account != null) {
-            // Update profile image
             if (account.getPhotoUrl() != null) {
                 String photoUrl = account.getPhotoUrl().toString();
-                RequestOptions requestOptions = new RequestOptions().transform(new RoundedCorners(300)) // Set the corner radius
-                        .placeholder(R.drawable.ic_user_foreground); // Placeholder image
+                RequestOptions requestOptions = new RequestOptions().transform(new RoundedCorners(300))
+                        .placeholder(R.drawable.ic_user_foreground);
                 Glide.with(this).load(photoUrl).apply(requestOptions).into(profileImageView);
             }
         } else {

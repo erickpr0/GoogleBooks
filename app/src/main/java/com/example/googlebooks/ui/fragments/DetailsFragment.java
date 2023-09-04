@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,8 +19,8 @@ import androidx.fragment.app.FragmentManager;
 
 import com.bumptech.glide.Glide;
 import com.example.googlebooks.R;
-import com.example.googlebooks.model.Book;
-import com.example.googlebooks.model.ImageLinks;
+import com.example.googlebooks.model.classes.Book;
+import com.example.googlebooks.model.classes.ImageLinks;
 import com.example.googlebooks.model.interfaces.GoogleBooksApi;
 import com.example.googlebooks.network.ApiClient;
 import com.example.googlebooks.ui.activities.MainActivity;
@@ -82,6 +81,7 @@ public class DetailsFragment extends Fragment {
         // Regresar a la pantalla de búsqueda
         back.setOnClickListener(v -> {
             MainActivity.progress.setVisibility(View.VISIBLE);
+            MainActivity.favorites.set(false);
             FragmentManager fragmentManager = requireActivity().getSupportFragmentManager();
             fragmentManager.popBackStack();
         });

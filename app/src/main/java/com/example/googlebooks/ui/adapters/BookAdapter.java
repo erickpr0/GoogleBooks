@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.googlebooks.R;
-import com.example.googlebooks.model.Book;
-import com.example.googlebooks.model.ImageLinks;
+import com.example.googlebooks.model.classes.Book;
+import com.example.googlebooks.model.classes.ImageLinks;
 
 import java.util.List;
 
@@ -48,8 +48,8 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
             String imageUrl = books.get(position).getVolumeInfo().getImageLinks().getThumbnail();
             Log.d("url", "onBindViewHolder: " + imageUrl);
             Glide.with(context)
-                    .load(imageUrl) // Path to the local file
-                    .override(200, 200) // Set the target dimensions
+                    .load(imageUrl)
+                    .override(200, 200)
                     .into(holder.img);
 
         } else {
@@ -61,10 +61,6 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.ViewHolder> {
                 onClickListener.onClick(position);
             }
         });
-    }
-
-    public interface OnItemLongClickListener {
-        void onItemLongClick(int position);
     }
 
     public void setOnClickListener(OnClickListener onClickListener) {

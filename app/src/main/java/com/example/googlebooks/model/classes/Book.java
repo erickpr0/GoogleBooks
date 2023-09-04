@@ -1,4 +1,4 @@
-package com.example.googlebooks.model;
+package com.example.googlebooks.model.classes;
 
 import android.os.Parcel;
 import android.os.Parcelable;

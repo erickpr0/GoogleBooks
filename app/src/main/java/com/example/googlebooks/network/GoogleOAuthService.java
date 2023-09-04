@@ -1,6 +1,6 @@
 package com.example.googlebooks.network;
 
-import com.example.googlebooks.model.AccessTokenResponse;
+import com.example.googlebooks.model.classes.AccessTokenResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Field;

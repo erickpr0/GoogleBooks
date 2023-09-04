@@ -1,8 +1,9 @@
 package com.example.googlebooks.model.interfaces;
 
-import com.example.googlebooks.model.ApiResponse;
-import com.example.googlebooks.model.Book;
-import com.example.googlebooks.model.VolumeListResponse;
+import com.example.googlebooks.model.classes.ApiResponse;
+import com.example.googlebooks.model.classes.Book;
+import com.example.googlebooks.model.classes.BookshelvesResponse;
+import com.example.googlebooks.model.classes.VolumeListResponse;
 
 import retrofit2.Call;
 import retrofit2.http.GET;

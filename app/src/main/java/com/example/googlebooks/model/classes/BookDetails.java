@@ -1,4 +1,4 @@
-package com.example.googlebooks.model;
+package com.example.googlebooks.model.classes;
 
 
 public class BookDetails {

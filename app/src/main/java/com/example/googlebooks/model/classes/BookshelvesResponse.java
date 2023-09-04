@@ -1,4 +1,4 @@
-package com.example.googlebooks.model.interfaces;
+package com.example.googlebooks.model.classes;
 
 import java.util.ArrayList;
 

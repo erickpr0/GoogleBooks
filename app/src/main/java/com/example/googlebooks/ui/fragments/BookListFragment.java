@@ -1,12 +1,15 @@
 package com.example.googlebooks.ui.fragments;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,12 +20,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.googlebooks.R;
-import com.example.googlebooks.model.ApiResponse;
-import com.example.googlebooks.model.Book;
-import com.example.googlebooks.model.Volume;
-import com.example.googlebooks.model.VolumeInfo;
-import com.example.googlebooks.model.VolumeListResponse;
-import com.example.googlebooks.model.interfaces.Bookshelf;
+import com.example.googlebooks.model.classes.ApiResponse;
+import com.example.googlebooks.model.classes.Book;
+import com.example.googlebooks.model.classes.VolumeListResponse;
 import com.example.googlebooks.model.interfaces.GoogleBooksApi;
 import com.example.googlebooks.network.ApiClient;
 import com.example.googlebooks.ui.activities.MainActivity;
@@ -47,6 +47,7 @@ public class BookListFragment extends Fragment {
     private static List<Book> previous;
     private static String accessToken;
     private static boolean favoriesActive = false;
+    private boolean favorites;
     //private static ArrayList<Bookshelf> bookshelves;
 
     @Nullable
@@ -64,6 +65,7 @@ public class BookListFragment extends Fragment {
         //bookshelves = requireArguments().getParcelableArrayList("shelves");
 
         recyclerView = view.findViewById(R.id.bookList);
+        ImageView filter = view.findViewById(R.id.filter);
         recyclerView.setLayoutManager(new GridLayoutManager(requireContext(), 2));
 
         Call<ApiResponse> call = ApiClient.getClient().create(GoogleBooksApi.class).searchBooks(searchTxt, 0, 10);
@@ -92,15 +94,7 @@ public class BookListFragment extends Fragment {
                                 if (response1.isSuccessful()) {
                                     Book b = response1.body();
                                     assert response1.body() != null;
-                                    Log.d("b", "onResponse: " + book.getId());
-                                    Log.d("b", "onResponse: " + response1.body());
-
                                     assert b != null;
-                                    Log.d("b", "onResponse: " + b.getVolumeInfo().getDescription());
-                                    Log.d("b", "onResponse: " + b.getVolumeInfo().getLanguage());
-                                    Log.d("b", "onResponse: " + b.getVolumeInfo().getPageCount());
-                                    Log.d("b", "onResponse: " + b.getVolumeInfo().getPublishedDate());
-
                                     Bundle bundle = new Bundle();
                                     bundle.putParcelable("book", b);
                                     bundle.putString("token", accessToken);
@@ -116,9 +110,6 @@ public class BookListFragment extends Fragment {
                             }
                         });
                     });
-                } else {
-                    Log.d("ibm", "onResponse: " + response.errorBody());
-                    Log.d("ibm", "onResponse: " + response.code());
                 }
             }
 
@@ -143,6 +134,23 @@ public class BookListFragment extends Fragment {
                 if (!isLoading && (visibleItemCount + firstVisibleItemPosition) >= totalItemCount && firstVisibleItemPosition >= 0) {
                     loadNextPage();
                 }
+            }
+        });
+
+        favorites = false;
+        filter.setOnClickListener(v -> {
+            if (favorites) {
+                Animation animation = AnimationUtils.loadAnimation(requireContext(), R.anim.anim_sub_buttons);
+                filter.setAnimation(animation);
+                filter.setImageResource(R.drawable.heart_selector);
+                clearFavorites();
+                favorites = false;
+            } else {
+                filter.setImageResource(R.drawable.ic_heart_red);
+                Animation animation = AnimationUtils.loadAnimation(requireContext(), R.anim.anim_sub_buttons);
+                filter.setAnimation(animation);
+                showFavorites(accessToken, requireContext());
+                favorites = true;
             }
         });
     }
@@ -176,7 +184,7 @@ public class BookListFragment extends Fragment {
         }
     }
 
-    public static void showFavorites(String accessToken) {
+    public void showFavorites(String accessToken, Context context) {
         Call<VolumeListResponse> call = ApiClient.getClient().create(GoogleBooksApi.class).getVolumesFromBookshelf("0", "Bearer " + accessToken); //favoritos
 
         call.enqueue(new Callback<VolumeListResponse>() {
